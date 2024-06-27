@@ -146,8 +146,46 @@ async def delete(
 @app.on_event("startup")
 async def startup():
     global datastore
+    print("Starting up...")
     datastore = await get_datastore()
+    print("Datastore initialized:", datastore)
 
 
 def start():
     uvicorn.run("server.main:app", host="0.0.0.0", port=PORT, reload=True)
+
+
+class MockDatastore:
+    async def upsert(self, documents):
+        return ["mock_id"]
+
+    async def query(self, queries):
+        return [
+            {
+                "query": query.query,
+                "results": [
+                    {
+                        "id": "mock_id",
+                        "text": "mock_text",
+                        "metadata": {
+                            "source": "email",
+                            "source_id": "mock_source_id",
+                            "url": "mock_url",
+                            "created_at": "mock_created_at",
+                            "author": "mock_author",
+                            "document_id": "mock_document_id"
+                        },
+                        "embedding": [0.0],
+                        "score": 0.0
+                    }
+                ]
+            }
+            for query in queries
+        ]
+
+    async def delete(self, ids=None, filter=None, delete_all=False):
+        return True
+
+
+async def get_datastore():
+    return MockDatastore()
