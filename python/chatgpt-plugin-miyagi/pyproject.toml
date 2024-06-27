@@ -21,7 +21,11 @@ azure-identity = "^1.12.0"
 qdrant-client = {version = "^1.0.4", python = "<3.12"}
 redis = "4.5.1"
 fmpsdk = "^20230312.0"
+python-multipart = "^0.0.9"
 
 [tool.poetry.scripts]
 start = "server.main:start"
 dev = "server.main:start"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^7.1.0"

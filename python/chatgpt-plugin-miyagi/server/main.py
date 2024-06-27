@@ -1,11 +1,9 @@
 import uvicorn
-from typing import List, Dict, Optional
+from typing import Optional
 from fastapi import FastAPI, File, Form, HTTPException, Body, UploadFile
-from starlette.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
-from connectors.bing import bing_news_search
 from models.api import UpsertResponse, UpsertRequest, QueryResponse, QueryRequest, DeleteResponse, DeleteRequest
 from models.models import DocumentMetadata, Source
 
@@ -52,7 +50,7 @@ async def upsert_file(
             if metadata
             else DocumentMetadata(source=Source.file)
         )
-    except:
+    except ValueError:
         metadata_obj = DocumentMetadata(source=Source.file)
 
     # TODO:
@@ -101,9 +99,12 @@ async def query_main(
 @sub_app.post(
     "/query",
     response_model=QueryResponse,
-    description="Accepts search query objects with query and optional filter. Break down complex questions into "
-                "sub-questions. Refine results by criteria, e.g. time / source, don't do this often. Split queries if "
-                "ResponseTooLargeError occurs.",
+    description=(
+        "Accepts search query objects with query and optional filter. Break down "
+        "complex questions into sub-questions. Refine results by criteria, e.g. "
+        "time / source, don't do this often. Split queries if ResponseTooLargeError "
+        "occurs."
+    ),
 )
 async def query(
     request: QueryRequest = Body(...),
@@ -145,7 +146,7 @@ async def delete(
 @app.on_event("startup")
 async def startup():
     global datastore
-    # TODO: datastore = await get_datastore()
+    datastore = await get_datastore()
 
 
 def start():
